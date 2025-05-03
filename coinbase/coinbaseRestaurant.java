@@ -1,3 +1,4 @@
+package coinbase;
 import java.util.*;
 public class coinbaseRestaurant {
     
