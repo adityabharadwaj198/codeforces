@@ -68,13 +68,27 @@ public class deliverysystem {
     public Map<String, List<Delivery>> idToDelivery = new HashMap<>();
 
     void addDriver(String driver, int rate) {
+        if (idToDriver.containsKey(driver)) {
+            throw new IllegalArgumentException("Driver already exists");
+        }
         idToDriver.putIfAbsent(driver, new Driver(driver, rate));
     }
 
     void recordDelivery(String driver, int start, int end) {
+        if (!idToDriver.containsKey(driver)) {
+            throw new IllegalArgumentException("driver " + driver + " doesn't exist, can't record a delivery for the driver.");
+        }
         List<Delivery> deliveries = idToDelivery.getOrDefault(driver, new ArrayList<>());
         deliveries.add(new Delivery(driver, start, end));
         idToDelivery.put(driver, deliveries);
+    }
+
+    List<Delivery> getAllDeliveries() {
+        List<Delivery> delivs = new ArrayList<>();
+        for (String s: idToDelivery.keySet()) {
+            delivs.addAll(idToDelivery.get(s));
+        }
+        return delivs;
     }
 
     public int totalCost() {
@@ -115,6 +129,22 @@ public class deliverysystem {
         return count;
     }
 
+    public int maxNumberOfDeliveriesAtATime(List<Delivery> deliveries) {
+        Map<Integer, Integer> mymap = new TreeMap<>();
+        for (Delivery d: deliveries) {
+            mymap.put(d.start, mymap.getOrDefault(d.start, 0) + 1);
+            mymap.put(d.end, mymap.getOrDefault(d.end, 0) - 1);
+        }
+
+        int count = 0;
+        int maxCount = Integer.MIN_VALUE;
+        for (int i: mymap.keySet()) {
+            count += mymap.get(i);
+            maxCount = Math.max(maxCount, count);
+        }
+        return maxCount;
+    }
+
     public boolean wasDriverOnline(int timestamp, List<Delivery> deliveries) {
         int upperbound = timestamp;
         int lowerbound = timestamp - 86400;
@@ -138,13 +168,10 @@ public class deliverysystem {
     }
 
     public boolean intervalsIntersect(Delivery delivery, int upperbound, int lowerbound) {
-        if (delivery.start >= lowerbound) {
-            return delivery.start <= upperbound;
+        if (delivery.end <= lowerbound || delivery.start >= upperbound) {
+            return false;
         }
-        if (delivery.end >= lowerbound) {
-            return delivery.end <= upperbound;
-        }
-        return false;
+        return true;
     }
 
     public static void main (String[] args) {
@@ -152,6 +179,7 @@ public class deliverysystem {
         
         ds.addDriver("a", 10);
         ds.addDriver("b", 5);
+        ds.addDriver("c", 20);
 
         ds.recordDelivery("a", 1, 5);
         ds.recordDelivery("a", 6, 7);
@@ -159,14 +187,18 @@ public class deliverysystem {
         ds.recordDelivery("b", 3, 4);
         ds.recordDelivery("b", 5, 6);
         ds.recordDelivery("b", 7, 10);
+        ds.recordDelivery("c", 1, 10);
+        ds.recordDelivery("c", 9, 10);
 
         int totalCost = ds.totalCost();
         int totalpaid = ds.payUpTo(6);
+        System.out.println("Total Paid" + totalpaid);
         
         int totalUnpaid = totalCost - totalpaid;
         System.out.println(totalUnpaid);
 
-        System.out.println(ds.calculateDriversOnline(86411));
+        System.out.println(ds.calculateDriversOnline(86409));
 
+        System.out.println(ds.maxNumberOfDeliveriesAtATime(ds.getAllDeliveries()));
     }
 }
