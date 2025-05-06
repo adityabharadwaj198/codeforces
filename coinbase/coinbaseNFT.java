@@ -29,7 +29,7 @@ public class coinbaseNFT {
         }
     }
 
-    public List<NFT> generateNFTs(int n, Map<String, List<Trait>> mymap ) {
+    public List<NFT> generateNFTsUsingRandomIndex(int n, Map<String, List<Trait>> mymap ) {
         List<NFT> nfts = new ArrayList<>();
         for (int i=0; i<n; i++) {
             NFT nft = new NFT();
@@ -45,7 +45,7 @@ public class coinbaseNFT {
     // trait a = (aa, ab, ac)
     // trat b = (ba, bb, bc)
 
-    public List<NFT> generateNFTsUsingOtherWay(int n, Map<String, List<Trait>> mymap ) {
+    public List<NFT> generateNFTsUsingBacktracking(int n, Map<String, List<Trait>> mymap ) {
         List<NFT> nfts = new ArrayList<>();
         List<String> traitNames = new ArrayList<>();
         for (String i: mymap.keySet()) {
@@ -66,6 +66,7 @@ public class coinbaseNFT {
         for (Trait t: mymap.get(traitname)) {
             temp.traitMap.put(traitname, t.value);
             recurse(n, index+1, traitNames, mymap, nfts, temp);
+            temp.traitMap.remove(traitname);
         }
     }
 
@@ -97,15 +98,15 @@ public class coinbaseNFT {
         mymap.put("traitA", List.of(cNft.new Trait("aa", 0.5), cNft.new Trait("ab", 0.6), cNft.new Trait("ac", 0.1)));
         mymap.put("traitB", List.of(cNft.new Trait("ba", 0.2), cNft.new Trait("bb", 0.3), cNft.new Trait("bc", 0.5)));
         
-        List<NFT> nfts = cNft.generateNFTs(5, mymap);
-        for (int i=0; i<nfts.size(); i++) {
-            System.out.println(nfts.get(i).traitMap.toString());
-        }
-
-        // List<NFT> nfts2 = new ArrayList<>();
-        // nfts2 =cNft.generateNFTsUsingOtherWay(5, mymap);
-        // for (int i=0; i<nfts2.size(); i++) {
-        //     System.out.println(nfts2.get(i).traitMap.toString());
+        // List<NFT> nfts = cNft.generateNFTs(5, mymap);
+        // for (int i=0; i<nfts.size(); i++) {
+        //     System.out.println(nfts.get(i).traitMap.toString());
         // }
+
+        List<NFT> nfts2 = new ArrayList<>();
+        nfts2 =cNft.generateNFTsUsingBacktracking(5, mymap);
+        for (int i=0; i<nfts2.size(); i++) {
+            System.out.println(nfts2.get(i).traitMap.toString());
+        }
     }
 }
